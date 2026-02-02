@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>For You 💙</title>
+<style>
+  body {
+    margin: 0;
+    background: black;
+    overflow: hidden;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  canvas {
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// ================= TEXT WORDS =================
+const sentence = [
+  "I", "saw", "this", "and", "thought", "of", "you.",
+  "An", "early", "wish—for", "your", "birthday", "month",
+  "💙Happy", "birthday", "in", "advance", "Cutie,"
+];
+
+const words = [];
+const startY = 80;
+
+ctx.font = "24px Segoe UI";
+
+// calculate total width for perfect centering
+let totalWidth = 0;
+sentence.forEach(word => {
+  totalWidth += ctx.measureText(word).width + 18;
+});
+
+let offsetX = (canvas.width - totalWidth) / 2;
+
+sentence.forEach(word => {
+  words.push({
+    text: word,
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    tx: offsetX,
+    ty: startY,
+    alpha: 0,
+    speed: Math.random() * 0.09 + 0.08   // 🚀 faster words
+  });
+
+  offsetX += ctx.measureText(word).width + 18;
+});
+
+function drawWords() {
+  ctx.font = "24px Segoe UI";
+  ctx.fillStyle = "#7ecbff";
+  ctx.shadowBlur = 18;
+  ctx.shadowColor = "#4fc3ff";
+
+  words.forEach(w => {
+    w.x += (w.tx - w.x) * w.speed;
+    w.y += (w.ty - w.y) * w.speed;
+    if (w.alpha < 1) w.alpha += 0.05; // faster fade-in
+
+    ctx.globalAlpha = w.alpha;
+    ctx.fillText(w.text, w.x, w.y);
+  });
+
+  ctx.globalAlpha = 1;
+}
+
+// ================= HEART =================
+const heartParticles = [];
+const heartTargets = [];
+
+function heart(t) {
+  return {
+    x: 16 * Math.pow(Math.sin(t), 3),
+    y:
+      13 * Math.cos(t) -
+      5 * Math.cos(2 * t) -
+      2 * Math.cos(3 * t) -
+      Math.cos(4 * t)
+  };
+}
+
+for (let i = 0; i < 2800; i++) {
+  const t = Math.random() * Math.PI * 2;
+  const p = heart(t);
+  heartTargets.push({
+    x: p.x * 18 + canvas.width / 2,
+    y: -p.y * 18 + canvas.height / 2 + 40
+  });
+}
+
+class Bubble {
+  constructor(target) {
+    this.x = Math.random() * canvas.width;
+    this.y = canvas.height + Math.random() * 400;
+    this.tx = target.x;
+    this.ty = target.y;
+    this.size = Math.random() * 2.5 + 1;
+    this.speed = Math.random() * 0.05 + 0.04; // 🚀 faster heart
+    this.alpha = Math.random() * 0.7 + 0.3;
+  }
+  update() {
+    this.x += (this.tx - this.x) * this.speed;
+    this.y += (this.ty - this.y) * this.speed;
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(120,200,255,${this.alpha})`;
+    ctx.shadowBlur = 22;
+    ctx.shadowColor = "#6fd3ff";
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+heartTargets.forEach(t => heartParticles.push(new Bubble(t)));
+
+// ================= FLOWERS =================
+const flowers = [];
+
+class Flower {
+  constructor() {
+    this.x = Math.random() * canvas.width;
+    this.y = canvas.height + 40;
+    this.size = 0;
+    this.maxSize = Math.random() * 6 + 6;
+    this.speed = Math.random() * 1.4 + 0.8; // slightly faster
+    this.alpha = 0;
+    this.color = `hsl(${Math.random() * 360},70%,70%)`;
+  }
+  update() {
+    this.y -= this.speed;
+    if (this.size < this.maxSize) this.size += 0.1;
+    if (this.alpha < 1) this.alpha += 0.03;
+  }
+  draw() {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.globalAlpha = this.alpha;
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = this.color;
+
+    for (let i = 0; i < 5; i++) {
+      ctx.rotate((Math.PI * 2) / 5);
+      ctx.beginPath();
+      ctx.fillStyle = this.color;
+      ctx.ellipse(0, this.size, this.size / 2, this.size, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+setInterval(() => {
+  if (flowers.length < 80) flowers.push(new Flower());
+}, 300);
+
+// ================= ANIMATION LOOP =================
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawWords();
+
+  heartParticles.forEach(p => {
+    p.update();
+    p.draw();
+  });
+
+  flowers.forEach(f => {
+    f.update();
+    f.draw();
+  });
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+// resize handling
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+
+</body>
+</html>
