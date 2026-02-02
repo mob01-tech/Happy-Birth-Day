@@ -28,36 +28,40 @@ canvas.height = window.innerHeight;
 
 // ================= TEXT WORDS =================
 const sentence = [
-  "I", "saw", "this", "and", "thought", "of", "you.",
-  "An", "early", "wish—for", "your", "birthday", "month",
-  "💙Happy", "birthday", "in", "advance", "Cutie,"
+  ["I", "saw", "this", "and", "thought", "of", "you."],
+  ["An", "early", "wish—for", "your", "birthday", "month", "💙"],
+  ["Happy", "birthday", "in", "advance", "Cutie,"]
 ];
 
 const words = [];
 const startY = 80;
+const lineHeight = 42;
 
 ctx.font = "24px Segoe UI";
 
-// calculate total width for perfect centering
-let totalWidth = 0;
-sentence.forEach(word => {
-  totalWidth += ctx.measureText(word).width + 18;
-});
+sentence.forEach((line, lineIndex) => {
+  let lineWidth = 0;
 
-let offsetX = (canvas.width - totalWidth) / 2;
-
-sentence.forEach(word => {
-  words.push({
-    text: word,
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    tx: offsetX,
-    ty: startY,
-    alpha: 0,
-    speed: Math.random() * 0.09 + 0.08   // 🚀 faster words
+  line.forEach(word => {
+    lineWidth += ctx.measureText(word).width + 18;
   });
 
-  offsetX += ctx.measureText(word).width + 18;
+  let offsetX = (canvas.width - lineWidth) / 2;
+  let y = startY + lineIndex * lineHeight;
+
+  line.forEach(word => {
+    words.push({
+      text: word,
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      tx: offsetX,
+      ty: y,
+      alpha: 0,
+      speed: Math.random() * 0.09 + 0.08
+    });
+
+    offsetX += ctx.measureText(word).width + 18;
+  });
 });
 
 function drawWords() {
@@ -69,7 +73,7 @@ function drawWords() {
   words.forEach(w => {
     w.x += (w.tx - w.x) * w.speed;
     w.y += (w.ty - w.y) * w.speed;
-    if (w.alpha < 1) w.alpha += 0.05; // faster fade-in
+    if (w.alpha < 1) w.alpha += 0.05;
 
     ctx.globalAlpha = w.alpha;
     ctx.fillText(w.text, w.x, w.y);
@@ -109,7 +113,7 @@ class Bubble {
     this.tx = target.x;
     this.ty = target.y;
     this.size = Math.random() * 2.5 + 1;
-    this.speed = Math.random() * 0.05 + 0.04; // 🚀 faster heart
+    this.speed = Math.random() * 0.05 + 0.04;
     this.alpha = Math.random() * 0.7 + 0.3;
   }
   update() {
@@ -137,7 +141,7 @@ class Flower {
     this.y = canvas.height + 40;
     this.size = 0;
     this.maxSize = Math.random() * 6 + 6;
-    this.speed = Math.random() * 1.4 + 0.8; // slightly faster
+    this.speed = Math.random() * 1.4 + 0.8;
     this.alpha = 0;
     this.color = `hsl(${Math.random() * 360},70%,70%)`;
   }
